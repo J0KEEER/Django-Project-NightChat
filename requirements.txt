@@ -1,0 +1,15 @@
+Django~=4.2
+djangorestframework~=3.15
+djangorestframework-simplejwt~=5.3
+channels~=4.1
+daphne~=4.1
+channels-redis~=4.2
+psycopg2-binary~=2.9
+django-environ~=0.11
+celery~=5.4
+redis~=5.0
+pynacl~=1.5
+django-cors-headers~=4.4
+pytest-django~=4.8
+pytest-asyncio~=0.23
+django-redis~=5.4

@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --color-bg-gradient: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+  
+  /* The image has a very soft, light background. Let's adjust for a light premium look. */
+  --bg-light: #f3f4f6;
+  --bg-blob-1: rgba(219, 234, 254, 0.6); /* Blue */
+  --bg-blob-2: rgba(254, 226, 226, 0.6); /* Red */
+  --bg-blob-3: rgba(240, 253, 244, 0.6); /* Green */
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-light);
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+  color: #1a1a1a;
+}
+
+body::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: 
+    radial-gradient(circle at 20% 30%, var(--bg-blob-1) 0%, transparent 40%),
+    radial-gradient(circle at 80% 20%, var(--bg-blob-2) 0%, transparent 40%),
+    radial-gradient(circle at 50% 80%, var(--bg-blob-3) 0%, transparent 40%);
+  filter: blur(80px);
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(17, 17, 17, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+@layer components {
+  .btn-circle {
+    @apply w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200;
+  }
+}
