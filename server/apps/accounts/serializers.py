@@ -15,10 +15,16 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 class UserSerializer(serializers.ModelSerializer):
+    google_connected = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ('id', 'email', 'display_name', 'bio', 'avatar', 'public_key', 'password')
+        fields = ('id', 'email', 'display_name', 'bio', 'avatar', 'public_key', 'password', 'google_connected')
         extra_kwargs = {'password': {'write_only': True}}
+
+    def get_google_connected(self, obj):
+        from allauth.socialaccount.models import SocialToken
+        return SocialToken.objects.filter(account__user=obj, account__provider='google').exists()
 
     def create(self, validated_data):
         user = User.objects.create_user(

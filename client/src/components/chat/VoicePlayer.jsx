@@ -75,12 +75,12 @@ export const VoicePlayer = ({ msg, isMe }) => {
   };
 
   return (
-    <div className={`flex items-center gap-3 p-2 min-w-[200px] ${isMe ? 'text-white' : 'text-gray-900'}`}>
+    <div className={`flex items-center gap-3 p-2 min-w-[200px] ${isMe ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
       <button 
         onClick={handleTogglePlay}
         disabled={isLoading}
         className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${
-          isMe ? 'bg-white/20 hover:bg-white/30' : 'bg-black/5 hover:bg-black/10'
+          isMe ? 'bg-white/20 hover:bg-white/30' : 'bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20'
         }`}
       >
         {isLoading ? (
@@ -93,10 +93,10 @@ export const VoicePlayer = ({ msg, isMe }) => {
       </button>
 
       <div className="flex-1 flex flex-col gap-1">
-        <div className="relative h-1.5 w-full bg-black/10 rounded-full overflow-hidden">
+        <div className="relative h-1.5 w-full bg-black/10 dark:bg-white/10 rounded-full overflow-hidden">
           <div 
             className={`absolute top-0 left-0 h-full transition-all duration-100 ${
-              isMe ? 'bg-white' : 'bg-black'
+              isMe ? 'bg-white' : 'bg-black dark:bg-white'
             }`}
             style={{ width: `${progress}%` }}
           />

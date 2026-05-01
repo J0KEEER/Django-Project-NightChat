@@ -35,11 +35,14 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from django.conf import settings
 
+from allauth.socialaccount.models import SocialApp, SocialAccount, SocialToken
+
 class GoogleLogin(generics.GenericAPIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
         token = request.data.get('access_token') # This is the ID Token (credential)
+        access_token = request.data.get('google_access_token')  # OAuth access token
         public_key = request.data.get('public_key')
         
         try:
@@ -62,6 +65,23 @@ class GoogleLogin(generics.GenericAPIView):
             elif not user.public_key and public_key:
                 user.public_key = public_key
                 user.save()
+
+            # ✅ Store the OAuth access token for Google API calls
+            if access_token:
+                try:
+                    social_app = SocialApp.objects.get(provider='google')
+                    social_account, _ = SocialAccount.objects.get_or_create(
+                        user=user,
+                        provider='google',
+                        defaults={'uid': idinfo['sub'], 'extra_data': idinfo}
+                    )
+                    SocialToken.objects.update_or_create(
+                        account=social_account,
+                        app=social_app,
+                        defaults={'token': access_token}
+                    )
+                except SocialApp.DoesNotExist:
+                    pass  # Google app not configured in DB — contacts won't work
 
             # Generate JWT tokens
             refresh = RefreshToken.for_user(user)

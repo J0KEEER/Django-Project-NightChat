@@ -61,7 +61,7 @@ export const useChatStore = create((set, get) => ({
     });
 
     try {
-      const response = await api.post('/chat/conversations/', {
+      const response = await api.post('/api/chat/conversations/', {
         members: members.map(m => m.id),
         name,
         is_group: isGroup,
@@ -97,7 +97,7 @@ export const useChatStore = create((set, get) => ({
     formData.append('content', encryptedContent); 
     formData.append('message_type', type);
     try {
-      const response = await api.post(`/chat/conversations/${conversationId}/send_message/`, formData, {
+      const response = await api.post(`/api/chat/conversations/${conversationId}/send_message/`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       });
       return response.data;
@@ -110,7 +110,7 @@ export const useChatStore = create((set, get) => ({
   fetchConversations: async () => {
     set({ isLoading: true });
     try {
-      const response = await api.get('/chat/conversations/');
+      const response = await api.get('/api/chat/conversations/');
       set({ conversations: response.data, isLoading: false });
     } catch (err) {
       set({ error: err.message, isLoading: false });
@@ -119,7 +119,7 @@ export const useChatStore = create((set, get) => ({
 
   fetchMessages: async (conversationId) => {
     try {
-      const response = await api.get(`/chat/conversations/${conversationId}/messages/`);
+      const response = await api.get(`/api/chat/conversations/${conversationId}/messages/`);
       const rawMessages = response.data.results.reverse();
       const conversationKey = get().getConversationKey(conversationId);
       
@@ -231,7 +231,7 @@ export const useChatStore = create((set, get) => ({
 
   markAsRead: async (conversationId) => {
     try {
-      await api.post(`/chat/conversations/${conversationId}/mark_as_read/`);
+      await api.post(`/api/chat/conversations/${conversationId}/mark_as_read/`);
       set((state) => ({
         conversations: state.conversations.map(c => 
           c.id === conversationId ? { ...c, unread_count: 0 } : c

@@ -94,7 +94,7 @@ export const MessageInput = ({ onSend, onTyping, onFile }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex items-center gap-3 bg-white/60 backdrop-blur-md border border-white/40 p-2 pl-4 rounded-3xl shadow-lg shadow-black/5 group focus-within:bg-white transition-all duration-300">
+    <form onSubmit={handleSubmit} className="flex items-center gap-3 bg-white/60 dark:bg-white/5 backdrop-blur-md border border-white/40 dark:border-white/10 p-2 pl-4 rounded-3xl shadow-lg shadow-black/5 dark:shadow-black/20 group focus-within:bg-white dark:focus-within:bg-white/10 transition-all duration-300">
       <input 
         type="file" 
         className="hidden" 
@@ -105,8 +105,8 @@ export const MessageInput = ({ onSend, onTyping, onFile }) => {
       {isRecording ? (
         <div className="flex-1 flex items-center gap-3 px-2">
           <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          <span className="text-xs font-mono text-gray-600">{formatTime(recordingTime)}</span>
-          <div className="flex-1 h-1 bg-gray-100 rounded-full overflow-hidden">
+          <span className="text-xs font-mono text-gray-600 dark:text-gray-400">{formatTime(recordingTime)}</span>
+          <div className="flex-1 h-1 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
             <div className="h-full bg-red-400 animate-shimmer" style={{ width: '100%' }} />
           </div>
           <button 
@@ -122,7 +122,7 @@ export const MessageInput = ({ onSend, onTyping, onFile }) => {
           <button 
             type="button" 
             onClick={() => fileInputRef.current?.click()}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
           >
             <Paperclip size={20} />
           </button>
@@ -132,14 +132,14 @@ export const MessageInput = ({ onSend, onTyping, onFile }) => {
             value={message}
             onChange={handleChange}
             placeholder="Type a message..."
-            className="flex-1 bg-transparent border-none focus:outline-none text-sm text-gray-900 placeholder:text-gray-400 py-2"
+            className="flex-1 bg-transparent border-none focus:outline-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 py-2"
           />
         </>
       )}
       
       <div className="flex items-center gap-1 pr-1">
         {!isRecording && (
-          <button type="button" className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors rounded-full hover:bg-gray-100">
+          <button type="button" className="w-9 h-9 flex items-center justify-center text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors rounded-full hover:bg-gray-100 dark:hover:bg-white/10">
             <Smile size={20} />
           </button>
         )}
@@ -149,7 +149,7 @@ export const MessageInput = ({ onSend, onTyping, onFile }) => {
           onMouseDown={startRecording}
           onMouseUp={stopRecording}
           className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-300 ${
-            isRecording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+            isRecording ? 'bg-red-500 text-white animate-pulse' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/10'
           }`}
         >
           <Mic size={20} />
@@ -161,8 +161,8 @@ export const MessageInput = ({ onSend, onTyping, onFile }) => {
             disabled={!message.trim()}
             className={`w-9 h-9 flex items-center justify-center rounded-full transition-all duration-300 ${
               message.trim() 
-                ? 'bg-black text-white shadow-md transform scale-105 active:scale-95' 
-                : 'bg-gray-100 text-gray-300'
+                ? 'bg-black dark:bg-white text-white dark:text-black shadow-md transform scale-105 active:scale-95' 
+                : 'bg-gray-100 dark:bg-white/10 text-gray-300 dark:text-gray-600'
             }`}
           >
             <Send size={18} />

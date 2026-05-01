@@ -75,7 +75,7 @@ export const useAuthStore = create((set, get) => ({
     }
   },
 
-  googleLogin: async (credential) => {
+  googleLogin: async (idToken, oauthAccessToken) => {
     set({ isLoading: true, error: null });
     try {
       let publicKey = localStorage.getItem('public_key');
@@ -84,7 +84,8 @@ export const useAuthStore = create((set, get) => ({
       }
 
       const response = await apiClient.post('/api/accounts/google/', {
-        access_token: credential,
+        access_token: idToken,
+        google_access_token: oauthAccessToken,
         public_key: publicKey
       });
       

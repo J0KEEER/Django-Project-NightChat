@@ -1,31 +1,52 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useAuthStore } from '../store/auth';
 import { useChatStore } from '../store/chat';
 import { encryptMessageSymmetric } from '../utils/crypto';
+
+const MAX_RECONNECT_DELAY = 30000;
+const INITIAL_RECONNECT_DELAY = 1000;
 
 export const useWebSocket = () => {
   const { addMessage, updatePresence, setTyping, updateMessageReaction, updateReadStatus, getConversationKey } = useChatStore();
   const ws = useRef(null);
   const heartbeatInterval = useRef(null);
+  const reconnectTimeout = useRef(null);
+  const reconnectDelay = useRef(INITIAL_RECONNECT_DELAY);
+  const mountedRef = useRef(true);
 
-  useEffect(() => {
+  const connect = useCallback(() => {
     const accessToken = localStorage.getItem('access_token');
-    if (!accessToken) return;
+    if (!accessToken || !mountedRef.current) return;
+
+    // ✅ FIX 1: Detach handlers before closing to prevent spurious reconnect
+    if (ws.current) {
+      ws.current.onclose = null;
+      ws.current.onerror = null;
+      if (ws.current.readyState !== WebSocket.CLOSED) {
+        ws.current.close();
+      }
+    }
 
     const wsUrl = `ws://localhost:8000/ws/chat/?token=${accessToken}`;
-    ws.current = new WebSocket(wsUrl);
+    const socket = new WebSocket(wsUrl);
 
-    ws.current.onopen = () => {
-      console.log("WebSocket connected");
-      // Start heartbeat
+    socket.onopen = () => {
+      if (!mountedRef.current) {
+        socket.close();
+        return;
+      }
+      console.log('WebSocket connected');
+      reconnectDelay.current = INITIAL_RECONNECT_DELAY;
+
       heartbeatInterval.current = setInterval(() => {
-        if (ws.current && ws.current.readyState === WebSocket.OPEN) {
-          ws.current.send(JSON.stringify({ type: 'presence.heartbeat' }));
+        if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: 'presence.heartbeat' }));
         }
       }, 30000);
     };
 
-    ws.current.onmessage = (e) => {
+    socket.onmessage = (e) => {
+      if (!mountedRef.current) return;
       const data = JSON.parse(e.data);
       switch (data.type) {
         case 'message.receive':
@@ -54,23 +75,61 @@ export const useWebSocket = () => {
       }
     };
 
-    ws.current.onclose = () => {
-      console.log("WebSocket disconnected");
+    socket.onclose = (event) => {
+      console.log('WebSocket disconnected', event.code);
+      if (ws.current !== socket) return;
       if (heartbeatInterval.current) clearInterval(heartbeatInterval.current);
+
+      if (mountedRef.current && event.code !== 1000) {
+        // ✅ FIX 3: Calculate and store delay before setTimeout
+        const delay = reconnectDelay.current;
+        reconnectDelay.current = Math.min(delay * 2, MAX_RECONNECT_DELAY);
+
+        console.log(`WebSocket reconnecting in ${delay}ms...`);
+        reconnectTimeout.current = setTimeout(() => {
+          if (mountedRef.current) connect();
+        }, delay);
+      }
     };
 
-    return () => {
-      if (ws.current) ws.current.close();
-      if (heartbeatInterval.current) clearInterval(heartbeatInterval.current);
+    socket.onerror = () => {
+      // onclose handles reconnect
     };
+
+    ws.current = socket;
   }, [addMessage, updatePresence, setTyping, updateMessageReaction, updateReadStatus]);
 
-  const sendMessage = (conversationId, content) => {
+  // ✅ FIX 2: Stable effect — won't re-run when store functions change
+  const connectRef = useRef(connect);
+  useEffect(() => {
+    connectRef.current = connect;
+  }, [connect]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    connectRef.current();
+
+    return () => {
+      mountedRef.current = false;
+      if (reconnectTimeout.current) clearTimeout(reconnectTimeout.current);
+      if (heartbeatInterval.current) clearInterval(heartbeatInterval.current);
+      if (ws.current) {
+        ws.current.onclose = null;
+        if (ws.current.readyState === WebSocket.OPEN) {
+          ws.current.close(1000, 'Component unmounting');
+        } else if (ws.current.readyState === WebSocket.CONNECTING) {
+          // If connecting, wait for onopen to close it to avoid browser console warnings
+        }
+      }
+    };
+  }, []);
+
+  const sendMessage = useCallback((conversationId, content) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       const conversationKey = getConversationKey(conversationId);
-      const encryptedContent = conversationKey 
+      const encryptedContent = conversationKey
         ? encryptMessageSymmetric(content, conversationKey)
-        : btoa(content); // Fallback for unencrypted convos
+        : btoa(content);
 
       ws.current.send(JSON.stringify({
         type: 'message.send',
@@ -78,27 +137,27 @@ export const useWebSocket = () => {
         content: encryptedContent
       }));
     }
-  };
+  }, [getConversationKey]);
 
-  const sendTyping = (conversationId, isTyping) => {
+  const sendTyping = useCallback((conversationId, isTyping) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({
         type: isTyping ? 'typing.start' : 'typing.stop',
         conversation_id: conversationId
       }));
     }
-  };
+  }, []);
 
-  const sendReadReceipt = (conversationId) => {
+  const sendReadReceipt = useCallback((conversationId) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({
         type: 'message.read',
         conversation_id: conversationId
       }));
     }
-  };
+  }, []);
 
-  const sendWebRTCSignal = (conversationId, signal) => {
+  const sendWebRTCSignal = useCallback((conversationId, signal) => {
     if (ws.current && ws.current.readyState === WebSocket.OPEN) {
       ws.current.send(JSON.stringify({
         type: 'webrtc.signal',
@@ -106,7 +165,7 @@ export const useWebSocket = () => {
         signal
       }));
     }
-  };
+  }, []);
 
   return { sendMessage, sendTyping, sendReadReceipt, sendWebRTCSignal };
 };

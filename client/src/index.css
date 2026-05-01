@@ -1,17 +1,29 @@
 @import "tailwindcss";
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-midnight-dark: #111111;
+  --color-midnight-light: #F8F9FA;
+  --color-midnight-accent: #FF8A65;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+  --font-inter: 'Inter', sans-serif;
+}
+
 :root {
-  --color-bg-gradient: radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
-                        radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
-                        radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
-  
-  /* The image has a very soft, light background. Let's adjust for a light premium look. */
   --bg-light: #f3f4f6;
-  --bg-blob-1: rgba(219, 234, 254, 0.6); /* Blue */
-  --bg-blob-2: rgba(254, 226, 226, 0.6); /* Red */
-  --bg-blob-3: rgba(240, 253, 244, 0.6); /* Green */
+  --bg-blob-1: rgba(219, 234, 254, 0.6);
+  --bg-blob-2: rgba(254, 226, 226, 0.6);
+  --bg-blob-3: rgba(240, 253, 244, 0.6);
+}
+
+.dark {
+  --bg-light: #0a0a0f;
+  --bg-blob-1: rgba(30, 40, 80, 0.5);
+  --bg-blob-2: rgba(80, 30, 50, 0.4);
+  --bg-blob-3: rgba(20, 50, 40, 0.4);
 }
 
 body {
@@ -23,6 +35,11 @@ body {
   position: relative;
   overflow: hidden;
   color: #1a1a1a;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.dark body {
+  color: #e5e7eb;
 }
 
 body::before {
@@ -38,15 +55,24 @@ body::before {
     radial-gradient(circle at 80% 20%, var(--bg-blob-2) 0%, transparent 40%),
     radial-gradient(circle at 50% 80%, var(--bg-blob-3) 0%, transparent 40%);
   filter: blur(80px);
+  transition: background 0.5s ease;
 }
 
+/* Light glass */
 .glass {
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
+.dark .glass {
+  background: rgba(20, 20, 30, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Dark glass */
 .glass-dark {
   background: rgba(17, 17, 17, 0.8);
   backdrop-filter: blur(12px);
@@ -54,7 +80,7 @@ body::before {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar - Light */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -70,6 +96,15 @@ body::before {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.2);
+}
+
+/* Custom scrollbar - Dark */
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 @layer components {

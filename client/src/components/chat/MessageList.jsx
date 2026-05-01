@@ -37,7 +37,7 @@ export const MessageList = ({ conversationId }) => {
     });
 
     if (isReadByAll) return <CheckCheck size={14} className="text-blue-500" />;
-    return <Check size={14} className="text-gray-400" />;
+    return <Check size={14} className="text-gray-400 dark:text-gray-500" />;
   };
 
   return (
@@ -58,7 +58,7 @@ export const MessageList = ({ conversationId }) => {
               <div className={`flex items-end gap-3 max-w-[85%] group ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                 <div className="shrink-0 mb-1">
                   {!isMe && showAvatar ? (
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 flex items-center justify-center text-[10px] font-bold text-gray-600 shadow-sm border border-white">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-500 flex items-center justify-center text-[10px] font-bold text-gray-600 dark:text-gray-200 shadow-sm border border-white dark:border-gray-700">
                       {msg.sender_details?.username?.[0]?.toUpperCase() || 'U'}
                     </div>
                   ) : (
@@ -69,13 +69,13 @@ export const MessageList = ({ conversationId }) => {
                 <div className="flex flex-col gap-1">
                   <div className={`px-5 py-3 shadow-sm relative group/bubble ${
                     isMe 
-                      ? 'bg-white text-gray-900 rounded-2xl rounded-br-none border border-black/5' 
-                      : 'bg-black text-white rounded-2xl rounded-bl-none'
+                      ? 'bg-white dark:bg-white/10 text-gray-900 dark:text-white rounded-2xl rounded-br-none border border-black/5 dark:border-white/10' 
+                      : 'bg-black dark:bg-indigo-600 text-white rounded-2xl rounded-bl-none'
                   }`}>
                     <p className="text-sm leading-relaxed">{msg.content_decrypted || msg.content}</p>
                     
                     {msg.attachment && (
-                      <div className="mt-3 overflow-hidden rounded-xl border border-black/5 bg-black/5">
+                      <div className="mt-3 overflow-hidden rounded-xl border border-black/5 dark:border-white/10 bg-black/5 dark:bg-white/5">
                         {msg.message_type === 'VOICE_MESSAGE' ? (
                           <VoicePlayer msg={msg} isMe={isMe} />
                         ) : (
@@ -90,7 +90,7 @@ export const MessageList = ({ conversationId }) => {
                         isMe ? '-left-10' : '-right-10'
                       }`}
                     >
-                      <Smile size={14} className="text-gray-500" />
+                      <Smile size={14} className="text-gray-500 dark:text-gray-400" />
                     </button>
                   </div>
                   
@@ -100,7 +100,7 @@ export const MessageList = ({ conversationId }) => {
                         <button
                           key={i}
                           onClick={() => toggleReaction(msg.id, r.emoji)}
-                          className="bg-white/80 backdrop-blur-sm border border-black/5 px-2 py-0.5 rounded-full text-[10px] hover:bg-white transition-colors shadow-sm flex items-center gap-1"
+                          className="bg-white/80 dark:bg-white/10 backdrop-blur-sm border border-black/5 dark:border-white/10 px-2 py-0.5 rounded-full text-[10px] hover:bg-white dark:hover:bg-white/20 transition-colors shadow-sm flex items-center gap-1"
                         >
                           <span>{r.emoji}</span>
                           <span className="font-bold opacity-60">{r.count || 1}</span>
@@ -111,7 +111,7 @@ export const MessageList = ({ conversationId }) => {
                 </div>
               </div>
               <div className={`flex items-center gap-2 mt-1.5 ${isMe ? 'mr-11' : 'ml-11'}`}>
-                <span className="text-[10px] text-gray-400 font-medium">
+                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-medium">
                   {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>
                 {isMe && getMessageStatus(msg)}
@@ -124,12 +124,12 @@ export const MessageList = ({ conversationId }) => {
             <>
               {activeTyping.length > 0 && (
                 <div className="flex items-center gap-3 ml-11 mb-6">
-                  <div className="bg-black text-white px-4 py-2 rounded-2xl rounded-bl-none flex gap-1.5 items-center shadow-md">
+                  <div className="bg-black dark:bg-indigo-600 text-white px-4 py-2 rounded-2xl rounded-bl-none flex gap-1.5 items-center shadow-md">
                     <span className="w-1 h-1 bg-white/60 rounded-full animate-bounce [animation-duration:0.8s]" />
                     <span className="w-1 h-1 bg-white/60 rounded-full animate-bounce [animation-duration:0.8s] [animation-delay:0.2s]" />
                     <span className="w-1 h-1 bg-white/60 rounded-full animate-bounce [animation-duration:0.8s] [animation-delay:0.4s]" />
                   </div>
-                  <span className="text-[10px] text-gray-500 font-semibold tracking-wide uppercase">
+                  <span className="text-[10px] text-gray-500 dark:text-gray-400 font-semibold tracking-wide uppercase">
                     Typing...
                   </span>
                 </div>
@@ -143,9 +143,9 @@ export const MessageList = ({ conversationId }) => {
       {!atBottom && (
         <button 
           onClick={() => virtuosoRef.current.scrollToIndex({ index: conversationMessages.length - 1, behavior: 'smooth' })}
-          className="absolute bottom-4 right-8 bg-white/80 backdrop-blur-md border border-white p-2 rounded-full shadow-lg hover:bg-white transition-all transform hover:scale-110 active:scale-95"
+          className="absolute bottom-4 right-8 bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border border-white dark:border-gray-700 p-2 rounded-full shadow-lg hover:bg-white dark:hover:bg-gray-700 transition-all transform hover:scale-110 active:scale-95"
         >
-          <ChevronDown size={20} className="text-gray-600" />
+          <ChevronDown size={20} className="text-gray-600 dark:text-gray-300" />
         </button>
       )}
     </div>
