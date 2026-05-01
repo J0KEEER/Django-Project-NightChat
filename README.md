@@ -1,118 +1,196 @@
-# 🌙 NightChat - Real-Time E2E Encrypted Chat
+<div align="center">
+  <img src="https://img.icons8.com/color/96/000000/night.png" alt="NightChat Logo" width="120" />
+  <h1>🌙 NightChat</h1>
+  <p><strong>Production-Grade Real-Time E2E Encrypted Chat Application</strong></p>
 
-[![Django](https://img.shields.io/badge/Django-4.2-092E20?logo=django)](https://www.djangoproject.com/)
-[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](https://reactjs.org/)
-[![libsodium](https://img.shields.io/badge/Security-libsodium-blueviolet)](https://libsodium.gitbook.io/doc/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![Django](https://img.shields.io/badge/Django-4.2-092E20?style=for-the-badge&logo=django)](https://www.djangoproject.com/)
+  [![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+  [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=for-the-badge&logo=postgresql)](https://www.postgresql.org/)
+  [![Redis](https://img.shields.io/badge/Redis-7.2-DC382D?style=for-the-badge&logo=redis)](https://redis.io/)
+  [![libsodium](https://img.shields.io/badge/Security-libsodium-blueviolet?style=for-the-badge)](https://libsodium.gitbook.io/doc/)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-NightChat is a production-grade, real-time chat application designed for privacy and scale. Built with **Django Channels** and **React**, it features end-to-end encryption (E2E) where the server only stores ciphertext.
+  <p align="center">
+    <a href="#-key-features">Features</a> •
+    <a href="#-architecture">Architecture</a> •
+    <a href="#-tech-stack">Tech Stack</a> •
+    <a href="#-security-zero-trust-model">Security</a> •
+    <a href="#-getting-started">Getting Started</a> •
+    <a href="#-contributing">Contributing</a>
+  </p>
+</div>
 
-## 🚀 Key Features
+---
 
--   **Real-Time Messaging**: Instant delivery via WebSockets (Django Channels + Daphne).
--   **End-to-End Encryption**: Zero-knowledge architecture using `libsodium` (X25519 + XSalsa20-Poly1305).
--   **Private & Group Chats**: Support for 1-on-1 and group chats with up to 1,000 members.
--   **Media Sharing**: Secure file sharing with a 100MB limit per attachment.
--   **Google Integration**: OAuth2 authentication and contact syncing.
--   **High Performance**: Designed to handle ~10,000 concurrent connections with <100ms latency.
--   **Responsive Design**: A sleek, glassmorphic UI built with React and Tailwind CSS.
+**NightChat** is a highly scalable, real-time chat application built with **Django Channels** and **React**. Designed from the ground up with a **Zero-Knowledge Architecture**, it delivers instantaneous messaging capabilities (under 100ms latency) while guaranteeing absolute privacy through strict End-to-End (E2E) encryption. The server acts purely as a relayer and ciphertext store — it never sees your plaintext.
 
-## 🛠️ Tech Stack
+---
 
-### Backend (Python/Django)
--   **Framework**: Django 4.2 LTS
--   **Real-time**: Django Channels 4.1+ (ASGI)
--   **Server**: Daphne (High-performance ASGI server)
--   **API**: Django REST Framework (DRF) + SimpleJWT
--   **Task Queue**: Celery + Redis (for background tasks like transcription)
+## ✨ Key Features
 
-### Frontend (React/Vite)
--   **Framework**: React 18
--   **Build Tool**: Vite
--   **State Management**: Zustand (Lightweight chat state)
--   **Crypto**: `libsodium.js` (Client-side encryption/decryption)
--   **Styling**: Tailwind CSS
+*   **⚡ Sub-100ms Real-Time Delivery**: Blazing fast bi-directional communication powered by Django Channels, Daphne, and Redis.
+*   **🔒 Absolute Privacy (E2E Encryption)**: Client-side encryption using `libsodium` (X25519 + XSalsa20-Poly1305). The server only stores `bytea` ciphertext.
+*   **👥 Scalable Group Chats**: Seamlessly handles private 1-on-1 conversations and massive group chats with up to 1,000 members.
+*   **📎 Secure Media Sharing**: Encrypted file attachments with support for payloads up to 100MB, stored securely.
+*   **🌐 Seamless Integration**: Features Google OAuth2 integration for frictionless onboarding and contact synchronization.
+*   **📈 Built for Scale**: Architected to comfortably support ~10,000 concurrent WebSocket connections with horizontal scalability.
+*   **🎨 Premium UI/UX**: A highly responsive, modern glassmorphic interface built with React, Vite, and Tailwind CSS.
 
-### Infrastructure
--   **Database**: PostgreSQL 16 (Required for `bytea` ciphertext storage)
--   **Cache/Bus**: Redis 7.2 (Channel layers & presence management)
--   **Containerization**: Docker + Docker Compose
+---
 
 ## 🏗️ Architecture
 
-NightChat uses a decoupled architecture:
-1.  **Client-Side**: Generates encryption keys. Plaintext never leaves the browser.
-2.  **WebSocket Layer**: Daphne handles full-duplex communication.
-3.  **Persistence Layer**: Django ORM stores encrypted blobs in PostgreSQL.
-4.  **Task Layer**: Celery processes asynchronous jobs (e.g., media processing).
+NightChat employs a decoupled, service-oriented architecture optimized for real-time WebSocket traffic and heavy cryptographic workloads.
 
-## 🚦 Getting Started
+```mermaid
+graph TD
+    Client[React Client + libsodium.js] <-->|WebSockets / HTTP| Daphne[Daphne ASGI Server]
+    Daphne <-->|Auth & REST APIs| Django[Django ORM / DRF]
+    Daphne <-->|Real-time Routing| Channels[Django Channels]
+    Channels <-->|Pub/Sub| Redis[(Redis 7.2)]
+    Django <-->|Ciphertext Storage| Postgres[(PostgreSQL 16)]
+    Django -.->|Async Tasks| Celery[Celery Workers]
+    Celery <--> Redis
+```
+
+1.  **Client-Side**: Generates ephemeral and persistent encryption keys. All cryptographic operations occur in the browser.
+2.  **WebSocket Layer**: Daphne terminates the WebSocket connections and passes them to Django Channels.
+3.  **Persistence Layer**: PostgreSQL 16 securely stores binary ciphertext using optimized `bytea` columns.
+4.  **Asynchronous Layer**: Celery handles heavy lifting like background notifications, media processing, and transcriptions without blocking the main event loop.
+
+---
+
+## 🛠️ Tech Stack
+
+### 🔙 Backend (Core)
+| Component | Technology | Rationale |
+| :--- | :--- | :--- |
+| **Framework** | Django 4.2 LTS | Rock-solid foundation, robust ORM. |
+| **Real-Time** | Django Channels 4.1+ | Native ASGI WebSocket handling. |
+| **ASGI Server** | Daphne | High-concurrency protocol server. |
+| **REST API** | DRF + SimpleJWT | Stateless token-based authentication. |
+| **Task Queue** | Celery + Redis | Asynchronous job execution. |
+
+### 🎨 Frontend
+| Component | Technology | Rationale |
+| :--- | :--- | :--- |
+| **Framework** | React 18 (Vite) | Lightning-fast HMR and modern UI rendering. |
+| **State** | Zustand | Zero-boilerplate, high-performance state management. |
+| **Styling** | Tailwind CSS | Utility-first styling for rapid UI development. |
+| **Crypto** | `libsodium.js` | WebAssembly-backed client-side cryptography. |
+
+### 🗄️ Infrastructure & Data
+| Component | Technology | Rationale |
+| :--- | :--- | :--- |
+| **Primary DB** | PostgreSQL 16 | ACID compliance, `bytea`, and `tsvector`. |
+| **In-Memory** | Redis 7.2 | Channel layer backplane and rapid caching. |
+| **Deployment** | Docker & Compose | Deterministic, containerized environments. |
+
+---
+
+## 🛡️ Security: Zero Trust Model
+
+NightChat operates on a strict **Zero Trust** principle. The server is considered an untrusted environment.
+
+*   **Key Exchange**: Perfect Forward Secrecy (PFS) powered by **X25519 Diffie-Hellman** key agreement.
+*   **Symmetric Encryption**: Message payloads are encrypted using the authenticated encryption cipher **XSalsa20-Poly1305**.
+*   **Ciphertext Only**: The database schema enforces security by only accepting binary blobs (`bytea`). The backend logic is intentionally unaware of message contents.
+*   **Authentication**: Passwords (where applicable) are hashed using **Argon2**, currently the strongest available key derivation function.
+
+---
+
+## 🚀 Getting Started
 
 ### Prerequisites
--   [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
--   [Node.js](https://nodejs.org/) (for local frontend development)
--   [Python 3.10+](https://www.python.org/) (for local backend development)
+*   [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
+*   *(Optional)* [Node.js](https://nodejs.org/) 18+ and [Python](https://www.python.org/) 3.10+ for manual local development.
 
-### Quick Start with Docker
-1.  **Clone the repository**:
+### 🐳 Quick Start (Docker - Recommended)
+
+The fastest way to get NightChat running is via Docker.
+
+1.  **Clone the repository:**
     ```bash
     git clone https://github.com/J0KEEER/Django-Project-NightChat.git
     cd Django-Project-NightChat
     ```
 
-2.  **Configure Environment**:
-    Create a `.env` file in the root based on `.env.example`:
+2.  **Set up environment variables:**
     ```bash
     cp .env.example .env
+    # Edit .env with your specific configurations (e.g., Google OAuth credentials)
     ```
 
-3.  **Run the application**:
+3.  **Spin up the infrastructure:**
     ```bash
     docker-compose up --build
     ```
-    The backend will be available at `http://localhost:8000` and the frontend at `http://localhost:5173` (if configured).
 
-### Manual Setup
+    *   **Backend API & WebSockets**: `http://localhost:8000`
+    *   **Frontend UI**: `http://localhost:5173`
 
-#### Backend
+### 💻 Manual Local Development
+
+If you prefer to run the services bare-metal for development:
+
+**1. Backend Setup**
 ```bash
 cd server
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
+
+# Run migrations and start the ASGI server
 python manage.py migrate
 python manage.py runserver
+# Or optimally: daphne -p 8000 config.asgi:application
 ```
 
-#### Frontend
+**2. Frontend Setup**
 ```bash
 cd client
 npm install
 npm run dev
 ```
 
-## 🔒 Security Architecture
-
-NightChat follows the **Zero Trust** principle for message content:
--   **Key Exchange**: Uses X25519 Diffie-Hellman for secure key agreement.
--   **Symmetric Encryption**: Messages are encrypted with XSalsa20-Poly1305.
--   **No Plaintext**: The Django database only sees `bytea` (binary) ciphertext and metadata.
--   **Passwords**: Hashed using **Argon2**, the strongest available hashing algorithm.
+---
 
 ## 📁 Project Structure
 
 ```text
-├── client/             # React application (Vite)
-├── server/             # Django application
-│   ├── apps/           # Django apps (accounts, chat, contacts)
-│   ├── config/         # ASGI/WSGI/URL configurations
-│   └── settings/       # Split settings (base, dev, prod)
-├── docker-compose.yml  # Docker orchestration
-└── GEMINI.md           # Internal project documentation
+NightChat/
+├── client/                 # React SPA (Vite, Zustand, Tailwind)
+├── server/                 # Django ASGI Application
+│   ├── apps/               # Modular Django apps:
+│   │   ├── accounts/       # User auth, JWT, Google OAuth
+│   │   ├── chat/           # WebSocket consumers, Channels logic
+│   │   └── contacts/       # Roster management
+│   ├── config/             # Root routing, ASGI/WSGI entrypoints
+│   └── settings/           # Environment-specific settings
+├── docker-compose.yml      # Multi-container orchestration
+└── README.md               # You are here!
 ```
 
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+---
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ---
-Built with ❤️ by [J0KEEER](https://github.com/J0KEEER)
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <p>Built with ❤️ by <a href="https://github.com/J0KEEER">J0KEEER</a> & Contributors</p>
+</div>
